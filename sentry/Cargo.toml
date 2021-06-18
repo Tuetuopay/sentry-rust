@@ -45,7 +45,7 @@ transport = ["reqwest", "native-tls"]
 reqwest = ["dep:reqwest", "httpdate", "tokio"]
 curl = ["dep:curl", "httpdate"]
 surf-h1 = ["surf/h1-client", "httpdate"]
-surf = ["surf/curl-client", "http-client", "httpdate", "isahc", "tokio"]
+surf = ["surf/curl-client", "http-client", "httpdate", "isahc", "serde_json", "tokio"]
 ureq = ["dep:ureq", "httpdate"]
 # transport settings
 native-tls = ["dep:native-tls", "reqwest?/default-tls", "ureq?/native-tls"]
