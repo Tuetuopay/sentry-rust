@@ -155,6 +155,8 @@ pub struct ClientOptions {
     pub trim_backtraces: bool,
     /// The user agent that should be reported.
     pub user_agent: Cow<'static, str>,
+    /// Use the legacy event store endpoint rather than envelopes for simple events.
+    pub use_legacy_event_endpoint: bool,
 }
 
 impl ClientOptions {
@@ -267,6 +269,7 @@ impl Default for ClientOptions {
             extra_border_frames: vec![],
             trim_backtraces: true,
             user_agent: Cow::Borrowed(USER_AGENT),
+            use_legacy_event_endpoint: false,
         }
     }
 }
