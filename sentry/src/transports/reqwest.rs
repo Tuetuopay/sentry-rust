@@ -40,12 +40,20 @@ impl ReqwestHttpTransport {
         let dsn = options.dsn.as_ref().unwrap();
         let user_agent = options.user_agent.to_owned();
         let auth = dsn.to_auth(Some(&user_agent)).to_string();
-        let url = dsn.envelope_api_url().to_string();
+        let envelope_url = dsn.envelope_api_url().to_string();
+        let store_url = dsn.store_api_url().to_string();
+        let use_store = options.use_legacy_event_endpoint;
 
         let thread = TransportThread::new(move |envelope, mut rl| {
-            let mut body = Vec::new();
-            envelope.to_writer(&mut body).unwrap();
-            let request = client.post(&url).header("X-Sentry-Auth", &auth).body(body);
+            let request = match use_store.then(|| envelope.event()).flatten() {
+                Some(event) => client.post(&store_url).json(event),
+                None => {
+                    let mut body = Vec::new();
+                    envelope.to_writer(&mut body).unwrap();
+                    client.post(&envelope_url).body(body)
+                }
+            };
+            let request = request.header("X-Sentry-Auth", &auth);
 
             // NOTE: because of lifetime issues, building the request using the
             // `client` has to happen outside of this async block.

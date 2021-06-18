@@ -35,7 +35,7 @@ debug-logs = ["log_", "sentry-core/debug-logs"]
 transport = ["reqwest", "native-tls"]
 reqwest = ["reqwest_", "httpdate"]
 curl = ["curl_", "httpdate", "serde_json"]
-surf = ["surf_", "httpdate"]
+surf = ["surf_", "httpdate", "serde_json"]
 native-tls = ["reqwest_/default-tls"]
 rustls = ["reqwest_/rustls-tls"]
 
