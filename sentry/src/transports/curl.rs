@@ -33,14 +33,16 @@ impl CurlHttpTransport {
         let dsn = options.dsn.as_ref().unwrap();
         let user_agent = options.user_agent.clone();
         let auth = dsn.to_auth(Some(&user_agent)).to_string();
-        let url = dsn.envelope_api_url().to_string();
+        let envelope_url = dsn.envelope_api_url().to_string();
+        let store_url = dsn.store_api_url().to_string();
         let scheme = dsn.scheme();
         let accept_invalid_certs = options.accept_invalid_certs;
+        let use_store = options.use_legacy_event_endpoint;
 
         let mut handle = client;
         let thread = TransportThread::new(move |envelope, rl| {
             handle.reset();
-            handle.url(&url).unwrap();
+            handle.url(&envelope_url).unwrap();
             handle.custom_request("POST").unwrap();
 
             if accept_invalid_certs {
@@ -63,7 +65,12 @@ impl CurlHttpTransport {
             }
 
             let mut body = Vec::new();
-            envelope.to_writer(&mut body).unwrap();
+            if let Some(event) = use_store.then(|| envelope.event()).flatten() {
+                handle.url(&store_url).unwrap();
+                serde_json::to_writer(&mut body, event).unwrap();
+            } else {
+                envelope.to_writer(&mut body).unwrap();
+            }
             let mut body = Cursor::new(body);
 
             let mut retry_after = None;
